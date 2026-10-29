@@ -81,28 +81,41 @@ def _dc_rc(ano: int, ultimo: int) -> list[Critica]:
         return [Critica("LIM-01", GRUPOS[0], "Relação despesas correntes / receitas correntes (art. 167-A)", "Sem dados",
                         "Não há dados do SICOM suficientes para 12 meses.")]
     ult = atual.iloc[-1]
-    maximo = atual.loc[atual["percentual"].idxmax()]
+    # O TCE-MG apura por bimestre; os meses intermediários entram como alerta antecipado.
+    bimestres = atual[atual["bimestre"]]
+    maximo = bimestres.loc[bimestres["percentual"].idxmax()] if not bimestres.empty else ult
+    maximo_mes = atual.loc[atual["percentual"].idxmax()]
     severidade = _faixa(float(maximo["percentual"]), [(95, "Crítico"), (85, "Alto")])
+    if severidade not in ("Crítico", "Alto") and float(maximo_mes["percentual"]) >= 85:
+        severidade = "Médio"
     resultado = (f"{pct(ult['percentual'])} nos 12 meses até {mes_ano(int(ult['per']) // 100, int(ult['per']) % 100)} "
-                 f"(metodologia TCE-MG); maior valor no exercício: {pct(maximo['percentual'])} em "
+                 f"(metodologia TCE-MG); maior valor bimestral no exercício: {pct(maximo['percentual'])} em "
                  f"{mes_ano(int(maximo['per']) // 100, int(maximo['per']) % 100)}.")
+    if maximo_mes["per"] != maximo["per"] and float(maximo_mes["percentual"]) > float(maximo["percentual"]):
+        resultado += (f" Fora dos bimestres, chegou a {pct(maximo_mes['percentual'])} em "
+                      f"{mes_ano(int(maximo_mes['per']) // 100, int(maximo_mes['per']) % 100)}.")
     resultado += f" Sem a exclusão do superávit: {pct(ult['percentual_sem_exclusao'])}."
     anomalias = indicadores.anomalias_mensais(ano)
     if not anomalias.empty and int(ult["per"]) % 100 in set(anomalias["Mês"]):
         resultado += " Atenção: o último mês do SICOM tem indício de remessa incompleta, o que reduz o percentual."
     detalhe = atual.assign(Mês=[mes_ano(p // 100, p % 100) for p in atual["per"]])[
-        ["Mês", "dc", "dc_superavit", "rc", "percentual", "percentual_sem_exclusao"]].rename(columns={
-            "dc": "Despesas correntes empenhadas (12 meses)", "dc_superavit": "DC com recursos de superávit (excluídas)",
+        ["Mês", "dc_liquidado", "rpnp", "dc", "dc_superavit", "rc", "percentual", "percentual_sem_exclusao"]].rename(columns={
+            "dc_liquidado": "DC liquidadas (12 meses)", "rpnp": "RPNP de dezembro",
+            "dc": "Despesas correntes (liquidadas + RPNP)", "dc_superavit": "DC com recursos de superávit (excluídas)",
             "rc": "Receitas correntes (12 meses)", "percentual": "DC/RC – metodologia TCE-MG (%)",
             "percentual_sem_exclusao": "DC/RC sem exclusão (%)"})
     return [Critica(
         "LIM-01", GRUPOS[0], "Relação despesas correntes / receitas correntes (art. 167-A)", severidade, resultado,
         referencia="Alerta: 85% (§1º) · Limite: 95% (caput)",
-        fundamento="CF/88, art. 167-A (EC nº 109/2021); TCE-MG, Consulta nº 1.160.617 (prejulgamento de tese, 11/12/2024).",
-        metodologia=("12 meses móveis, apurados mês a mês com os dados do SICOM: despesas correntes empenhadas, excluídas as "
-                     "custeadas por créditos abertos com superávit financeiro do exercício anterior (fontes iniciadas por 2), "
-                     "divididas pelas receitas correntes realizadas, líquidas das deduções (FUNDEB). Intraorçamentárias "
-                     "excluídas dos dois lados."),
+        fundamento=("CF/88, art. 167-A (EC nº 109/2021); TCE-MG, Consulta nº 1.160.617 (prejulgamento de tese, 11/12/2024) "
+                    "e Instrução Normativa nº 07/2025, art. 2º."),
+        metodologia=("12 meses móveis com os dados do SICOM, apurados por bimestre (o painel mostra também os meses "
+                     "intermediários). Despesas correntes liquidadas nos 12 meses, mais as empenhadas e não liquidadas "
+                     "inscritas em restos a pagar não processados (RPNP) em dezembro: de janeiro a novembro, os RPNP "
+                     "inscritos em 31/12 do exercício anterior, menos os cancelados; em dezembro, os do próprio exercício. "
+                     "Excluídas as despesas custeadas por créditos abertos com superávit financeiro do exercício anterior "
+                     "(fontes iniciadas por 2). Receitas correntes arrecadadas, líquidas das deduções (FUNDEB, restituições "
+                     "etc.). Intraorçamentárias incluídas dos dois lados."),
         fonte="SICOM (TCE-MG) – Receitas e Despesas",
         recomendacao=("Acima de 95%: avaliar a adoção dos mecanismos de ajuste fiscal do art. 167-A (vedações a reajustes, "
                       "criação de cargos, admissões, concursos, novas despesas obrigatórias etc.). Enquanto as medidas não "

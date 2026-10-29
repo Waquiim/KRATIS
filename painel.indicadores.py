@@ -281,53 +281,93 @@ def pessoal_12m(ano: int, mes: int) -> dict:
 # ----------------------------------------------------------------------------- art. 167-A
 
 def dc_rc(ano: int, mes: int) -> dict:
-    """Relação despesas correntes / receitas correntes em 12 meses (CF art. 167-A).
+    """Relação despesas correntes / receitas correntes nos 12 meses até ano/mes (CF art. 167-A).
 
-    Metodologia TCE-MG (Consulta nº 1.160.617, de 11/12/2024): despesas correntes empenhadas,
-    excluídas as custeadas por créditos abertos com superávit financeiro do exercício anterior
-    (fontes de exercícios anteriores, prefixo 2). Receitas correntes realizadas, líquidas das
-    deduções. Intraorçamentárias excluídas dos dois lados."""
-    periodos = janela(ano, mes)
-    anos = {p // 100 for p in periodos}
-    d = _despesas_anos(anos)
-    r = _receitas_anos(anos)
-    if d.empty or r.empty:
-        return {"completo": False}
-    d = d[d["per"].isin(periodos) & d["categoria_cod"].eq("3") & ~d["intra"]]
-    r = r[r["per"].isin(periodos) & r["categoria_cod"].eq("1")]
-    faltantes = [p for p in periodos if p not in set(r["per"]) or p not in set(d["per"])]
-    dc_total = float(d["empenhado"].sum())
-    dc_superavit = float(d.loc[d["fonte_exercicio"].eq("2"), "empenhado"].sum())
-    rc = float(r["realizado"].sum())
+    Metodologia em dc_rc_serie (TCE-MG, Consulta nº 1.160.617 e IN nº 07/2025)."""
+    serie = dc_rc_serie()
+    per = ano * 100 + mes
+    linha = serie[serie["per"].eq(per)] if not serie.empty else serie
+    if linha.empty:
+        return {"completo": False, "periodos": janela(ano, mes)}
+    ult = linha.iloc[-1]
     return {
-        "periodos": periodos, "completo": not faltantes, "faltantes": faltantes,
-        "despesas_correntes": dc_total, "despesas_superavit": dc_superavit,
-        "despesas_consideradas": dc_total - dc_superavit, "receitas_correntes": rc,
-        "percentual": _pct(dc_total - dc_superavit, rc),
-        "percentual_sem_exclusao": _pct(dc_total, rc),
+        "periodos": janela(ano, mes), "completo": True, "faltantes": [],
+        "despesas_liquidadas": float(ult["dc_liquidado"]), "rpnp": float(ult["rpnp"]),
+        "despesas_correntes": float(ult["dc"]), "despesas_superavit": float(ult["dc_superavit"]),
+        "despesas_consideradas": float(ult["dc"] - ult["dc_superavit"]), "receitas_correntes": float(ult["rc"]),
+        "percentual": float(ult["percentual"]), "percentual_sem_exclusao": float(ult["percentual_sem_exclusao"]),
     }
 
 
+def _rpnp_cancelados(anos) -> pd.Series:
+    """Cancelamentos, por mês (AAAAMM), de RPNP de despesas correntes inscritos em 31/12 do exercício anterior."""
+    partes = []
+    for ano in anos:
+        _, mov = dados.restos_a_pagar(ano)
+        if mov.empty:
+            continue
+        natureza = mov["dsc_dotacao_origem"].astype(str).str.split(".").str[6]
+        canc = mov[mov["tipo_rp"].str.contains("NÃO PROCESSADOS", na=False) & mov["movimento"].eq("CANCELAMENTO")
+                   & natureza.eq("3") & mov["num_ano_emp_origem"].astype(int).eq(ano - 1)]
+        partes.append(canc.groupby(canc["ano"].astype(int) * 100 + canc["mes"].astype(int))["vlr_movimentacao"].sum())
+    return pd.concat(partes) if partes else pd.Series(dtype=float)
+
+
 def dc_rc_serie() -> pd.DataFrame:
-    """Série mensal da relação DC/RC (12 meses móveis) com todos os meses disponíveis."""
+    """Série mensal da relação DC/RC (12 meses móveis) com todos os meses disponíveis.
+
+    Metodologia TCE-MG (IN nº 07/2025, que regulamenta a Consulta nº 1.160.617, de 11/12/2024):
+    - despesas correntes liquidadas nos 12 meses, mais as empenhadas e não liquidadas inscritas em restos a pagar não
+      processados (RPNP) em dezembro: nas apurações de janeiro a novembro, os RPNP inscritos em 31/12 do exercício
+      anterior, menos os cancelados até o mês (não mudam com a liquidação); em dezembro, os RPNP do próprio exercício;
+    - excluídas as despesas custeadas por créditos abertos com superávit financeiro do exercício anterior (fontes de
+      exercícios anteriores, iniciadas por 2);
+    - receitas correntes arrecadadas, líquidas das deduções (FUNDEB, restituições etc.);
+    - intraorçamentárias incluídas dos dois lados.
+    O TCE-MG apura por bimestre (fevereiro, abril, ..., dezembro); o painel mostra também os meses intermediários."""
     anos = sorted({a for a in range(2000, 2100) if tce_sicom.caminho_zip(a, "receita").exists()})
     if not anos:
         return pd.DataFrame()
     d = _despesas_anos(anos)
     r = _receitas_anos(anos)
-    dc = d[d["categoria_cod"].eq("3") & ~d["intra"]]
-    dcm = dc.groupby("per")["empenhado"].sum()
-    dcs = dc[dc["fonte_exercicio"].eq("2")].groupby("per")["empenhado"].sum()
-    rcm = r[r["categoria_cod"].eq("1")].groupby("per")["realizado"].sum()
-    todos = sorted(set(rcm.index) | set(dcm.index))
+    dc = d[d["categoria_cod"].eq("3")]
+    sup = dc["fonte_exercicio"].eq("2")
+    liq = dc.groupby("per")["liquidado"].sum()
+    liq_sup = dc[sup].groupby("per")["liquidado"].sum()
+    # RPNP inscritos em 31/12: empenhado − liquidado do exercício (só exercícios com dezembro no SICOM).
+    completos = {int(a) for a in dc.loc[dc["mes"].eq(12), "ano"].unique()}
+    a_liq = (dc["empenhado"] - dc["liquidado"])
+    rpnp = a_liq.groupby(dc["ano"]).sum()
+    rpnp_sup = a_liq[sup].groupby(dc.loc[sup, "ano"]).sum()
+    cancelados = _rpnp_cancelados(anos)
+    rc = r[r["categoria_cod"].isin(["1", "7"])].groupby("per")["realizado"].sum()
+
+    todos = sorted(set(rc.index) | set(liq.index))
     serie = pd.DataFrame(index=todos)
-    serie["dc"] = dcm.reindex(todos, fill_value=0.0)
-    serie["dc_superavit"] = dcs.reindex(todos, fill_value=0.0)
-    serie["rc"] = rcm.reindex(todos, fill_value=0.0)
-    janela12 = serie.rolling(12).sum()
+    serie["dc_liquidado"] = liq.reindex(todos, fill_value=0.0)
+    serie["liq_superavit"] = liq_sup.reindex(todos, fill_value=0.0)
+    serie["rc"] = rc.reindex(todos, fill_value=0.0)
+    janela12 = serie.rolling(12).sum().dropna()
+
+    linhas_rpnp, linhas_sup = [], []
+    for per in janela12.index:
+        ano, mes = per // 100, per % 100
+        base = ano if mes == 12 else ano - 1
+        if base not in completos:
+            linhas_rpnp.append(None)
+            linhas_sup.append(None)
+            continue
+        cancelado = 0.0 if mes == 12 else float(cancelados[(cancelados.index >= ano * 100 + 1) & (cancelados.index <= per)].sum())
+        linhas_rpnp.append(float(rpnp.get(base, 0.0)) - cancelado)
+        linhas_sup.append(float(rpnp_sup.get(base, 0.0)))
+    janela12["rpnp"] = linhas_rpnp
+    janela12["rpnp_superavit"] = linhas_sup
+    janela12 = janela12.dropna()
+    janela12["dc"] = janela12["dc_liquidado"] + janela12["rpnp"]
+    janela12["dc_superavit"] = janela12["liq_superavit"] + janela12["rpnp_superavit"]
     janela12["percentual"] = (janela12["dc"] - janela12["dc_superavit"]) / janela12["rc"] * 100
     janela12["percentual_sem_exclusao"] = janela12["dc"] / janela12["rc"] * 100
-    janela12 = janela12.dropna()
+    janela12["bimestre"] = (janela12.index % 100) % 2 == 0
     janela12["data"] = [date(p // 100, p % 100, 1) for p in janela12.index]
     return janela12.reset_index(names="per")
 

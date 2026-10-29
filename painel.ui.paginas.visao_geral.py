@@ -61,9 +61,13 @@ def pagina() -> None:
     atual = serie[serie["per"] // 100 == ano] if not serie.empty else serie
     if not atual.empty:
         ult = atual.iloc[-1]
+        bimestres = atual[atual["bimestre"]]
+        maximo = bimestres["percentual"].max() if not bimestres.empty else ult["percentual"]
         comum.kpi(c[0], "DC/RC (art. 167-A)", pct(ult["percentual"]),
-                  "Art. 167-A da CF, 12 meses, metodologia TCE-MG (exclui despesas com superávit). Alerta 85%; limite 95%.",
-                  delta=f"máx. {pct(atual['percentual'].max(), 1)} no ano", cor_delta="off")
+                  "Art. 167-A da CF, 12 meses, metodologia TCE-MG (Consulta nº 1.160.617 e IN nº 07/2025): despesas "
+                  "correntes liquidadas + RPNP de dezembro, sem as custeadas com superávit, ÷ receitas correntes "
+                  "líquidas; com intraorçamentárias. Alerta 85%; limite 95%. Máximo entre os bimestres do ano.",
+                  delta=f"máx. {pct(maximo, 1)} no ano", cor_delta="off")
     est = indicadores.pessoal_12m(ano, mes)
     comum.kpi(c[1], "Pessoal – Executivo", pct(est.get("percentual_executivo")),
               "Despesa líquida com pessoal em 12 meses ÷ RCL ajustada, apuradas com o SICOM. Limite 54%, prudencial 51,3%.")

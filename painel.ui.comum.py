@@ -55,6 +55,20 @@ section[data-testid="stSidebar"] .pv-fonte {{ font-size: .8rem; line-height: 1.3
   .pv-cabecalho {{ padding: 12px 14px 14px; }}
   .pv-titulo {{ border-left: none; padding-left: 0; min-width: 0; }}
 }}
+/* Barras de evolução dentro de um cartão de indicador (kpi_evolucao). */
+.pv-evo {{ margin-top: 6px; padding-top: 16px; }}
+.pv-evo-area {{ position: relative; height: 64px; display: flex; align-items: flex-end; gap: 6px; }}
+.pv-evo-barra {{ position: relative; flex: 1; min-width: 0; border-radius: 3px 3px 0 0; }}
+.pv-evo-barra span {{ position: absolute; bottom: 100%; left: 50%; transform: translateX(-50%); font-size: 11px;
+  line-height: 15px; color: var(--pv-grafite); white-space: nowrap;
+  background: #fff; padding: 0 2px; border-radius: 3px; z-index: 2; }}
+.pv-evo-limite {{ position: absolute; left: 0; right: 0; border-top: 1px dashed #8E1414; z-index: 1; }}
+.pv-evo-rotulos {{ display: flex; gap: 6px; margin-top: 3px; }}
+.pv-evo-compacto .pv-evo-area, .pv-evo-compacto .pv-evo-rotulos {{ gap: 3px; }}
+.pv-evo-compacto .pv-evo-barra span {{ font-size: 9px; letter-spacing: -0.3px; padding: 0; }}
+.pv-evo-compacto .pv-evo-rotulos span {{ font-size: 10px; }}
+.pv-evo-rotulos span {{ flex: 1; min-width: 0; text-align: center; font-size: 11px; color: #6B6B6B; white-space: nowrap;
+  overflow: hidden; }}
 </style>
 """
 
@@ -222,6 +236,37 @@ def colunas_kpi(quantidade: int, chave: str) -> list:
 def kpi(coluna, rotulo: str, valor: str, ajuda: str | None = None, delta: str | None = None,
         cor_delta: str = "normal") -> None:
     coluna.metric(rotulo, valor, delta=delta, delta_color=cor_delta, help=ajuda, border=True, width="stretch")
+
+
+def kpi_evolucao(coluna, rotulo: str, valor: str, ajuda: str, delta: str, periodos: list[str], percentuais: list[float],
+                 alerta: float, limite: float, chave: str) -> None:
+    """Cartão de indicador com a evolução no período em barras rotuladas e a linha tracejada do limite.
+
+    As barras são HTML/CSS (e não Plotly) para caberem em cartões estreitos, como os do celular."""
+    with coluna.container(border=True, key=chave):
+        st.metric(rotulo, valor, delta=delta, delta_color="off", help=ajuda)
+        if not percentuais:
+            return
+        piso = min(min(percentuais), alerta) - 5
+        teto = max(max(percentuais), limite) + 3
+
+        def altura(v: float) -> str:
+            return f"{max(0.0, min(100.0, (v - piso) / (teto - piso) * 100)):.1f}%"
+
+        def cor(v: float) -> str:
+            return CORES["vermelho"] if v >= limite else CORES["dourado"] if v >= alerta else CORES["azul"]
+
+        def br(v: float, casas: int) -> str:
+            return f"{v:.{casas}f}".replace(".", ",")
+
+        barras = "".join(f"<div class='pv-evo-barra' style='height:{altura(v)};background:{cor(v)}' "
+                         f"title='{html.escape(p)}: {br(v, 2)}%'><span>{br(v, 1)}</span></div>"
+                         for p, v in zip(periodos, percentuais))
+        rotulos = "".join(f"<span>{html.escape(p)}</span>" for p in periodos)
+        compacto = " pv-evo-compacto" if len(periodos) > 4 else ""  # muitos períodos: rótulos menores
+        st.markdown(f"<div class='pv-evo{compacto}'><div class='pv-evo-area'>"
+                    f"<div class='pv-evo-limite' style='bottom:{altura(limite)}' title='Limite {br(limite, 0)}%'></div>"
+                    f"{barras}</div><div class='pv-evo-rotulos'>{rotulos}</div></div>", unsafe_allow_html=True)
 
 
 # ----------------------------------------------------------------------------- gráficos

@@ -1,4 +1,4 @@
-PAINEL CONTÁBIL E FISCAL – VIÇOSA/MG – VERSÃO WEB (gerada em 29/10/2026 11:58)
+PAINEL CONTÁBIL E FISCAL – VIÇOSA/MG – VERSÃO WEB (gerada em 29/10/2026 15:09)
 
 O painel roda inteiro dentro do navegador do aparelho; nenhum servidor externo processa os dados.
 

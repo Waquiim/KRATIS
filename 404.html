@@ -112,7 +112,7 @@ const base = partes.join("/") + "/";
 const files = {};
 // URLs absolutas: o Python roda num Web Worker, que não resolve endereços relativos à página.
 // "?v=" muda a cada geração, para o navegador nunca usar arquivos de uma versão anterior.
-for (const [caminho, url] of Object.entries(arquivos)) files[caminho] = { url: new URL(url + "?v=20261029-1158-93b99f95", location.origin + base).href };
+for (const [caminho, url] of Object.entries(arquivos)) files[caminho] = { url: new URL(url + "?v=20261029-1509-389ab533", location.origin + base).href };
 // O tema vai dentro desta página, e não como arquivo à parte, para a publicação depender de um arquivo a menos.
 files[".streamlit/config.toml"] = { data: "# Identidade visual da Prefeitura de Viçosa (cores extraídas da logo oficial)\n[theme]\nbase = \"light\"\nprimaryColor = \"#B11E25\"\nbackgroundColor = \"#FFFFFF\"\nsecondaryBackgroundColor = \"#F6F3EF\"\ntextColor = \"#262626\"\nlinkColor = \"#1F5FAE\"\nborderColor = \"#E4DED6\"\nfont = \"sans serif\"\nbaseRadius = \"0.5rem\"\nredColor = \"#B11E25\"\nblueColor = \"#1F5FAE\"\nyellowColor = \"#A67C00\"\nchartCategoricalColors = [\"#B11E25\", \"#1F5FAE\", \"#A67C00\", \"#1baf7a\", \"#6250d6\", \"#e87ba4\", \"#008300\", \"#eb6834\"]\n\n[theme.sidebar]\nbackgroundColor = \"#FBF8F4\"\nsecondaryBackgroundColor = \"#F1ECE6\"\n\n[server]\nheadless = true\nrunOnSave = false\n# Só aceita conexões deste computador. Para compartilhar na rede interna, use: --server.address 0.0.0.0\naddress = \"localhost\"\nfileWatcherType = \"none\"\n\n[browser]\ngatherUsageStats = false\n\n[client]\ntoolbarMode = \"minimal\"\n" };
 

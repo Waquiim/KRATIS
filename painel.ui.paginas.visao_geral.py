@@ -58,16 +58,26 @@ def pagina() -> None:
     comum.secao("Indicadores fiscais", "Percentuais do exercício (metodologia oficial). Detalhes e memória de cálculo na aba Críticas.")
     c = comum.colunas_kpi(5, "visao_geral-2")
     serie = indicadores.dc_rc_serie()
-    atual = serie[serie["per"] // 100 == ano] if not serie.empty else serie
+    atual = serie[serie["per"].between(ano * 100 + 1, ano * 100 + mes)] if not serie.empty else serie
     if not atual.empty:
-        ult = atual.iloc[-1]
+        # Evolução por bimestre (como o TCE-MG apura); antes de fechar o 1º bimestre, mostra o mês.
         bimestres = atual[atual["bimestre"]]
-        maximo = bimestres["percentual"].max() if not bimestres.empty else ult["percentual"]
-        comum.kpi(c[0], "DC/RC (art. 167-A)", pct(ult["percentual"]),
-                  "Art. 167-A da CF, 12 meses, metodologia TCE-MG (Consulta nº 1.160.617 e IN nº 07/2025): despesas "
-                  "correntes liquidadas + RPNP de dezembro, sem as custeadas com superávit, ÷ receitas correntes "
-                  "líquidas; com intraorçamentárias. Alerta 85%; limite 95%. Máximo entre os bimestres do ano.",
-                  delta=f"máx. {pct(maximo, 1)} no ano", cor_delta="off")
+        ult = bimestres.iloc[-1] if not bimestres.empty else atual.iloc[-1]
+        evolucao = "; ".join(f"{int(b['per']) % 100 // 2}º bim.: {pct(b['percentual'])}" for _, b in bimestres.iterrows())
+        if bimestres.empty:
+            rotulo_delta = f"até {mes_ano(ano, int(ult['per']) % 100)}"
+        else:
+            rotulo_delta = f"{int(ult['per']) % 100 // 2}º bimestre"  # os demais estão nas barras
+        comum.kpi_evolucao(
+            c[0], "DC/RC (art. 167-A)", pct(ult["percentual"]),
+            f"Evolução por bimestre em {ano}: {evolucao or 'nenhum bimestre fechado'}. "
+            "Art. 167-A da CF, 12 meses, metodologia TCE-MG (Consulta nº 1.160.617 e IN nº 07/2025): despesas "
+            "correntes liquidadas + RPNP de dezembro, sem as custeadas com superávit, ÷ receitas correntes "
+            "líquidas; com intraorçamentárias. Barras: azul abaixo de 85%, dourado no alerta (85%), vermelho no "
+            "limite (95%, linha tracejada).",
+            rotulo_delta, [f"{int(p) % 100 // 2}º" + (" bim" if len(bimestres) <= 4 else "") for p in bimestres["per"]],
+            [float(v) for v in bimestres["percentual"]], LIMITES["dc_rc"]["alerta"], LIMITES["dc_rc"]["limite"],
+            "vg-dcrc")
     est = indicadores.pessoal_12m(ano, mes)
     comum.kpi(c[1], "Pessoal – Executivo", pct(est.get("percentual_executivo")),
               "Despesa líquida com pessoal em 12 meses ÷ RCL ajustada, apuradas com o SICOM. Limite 54%, prudencial 51,3%.")

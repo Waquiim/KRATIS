@@ -1,0 +1,141 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no, viewport-fit=cover">
+<title>Painel Contábil · Viçosa/MG</title>
+<meta name="theme-color" content="#B11E25">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Painel Viçosa">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icone-192.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@stlite/browser@1.9.2/build/stlite.css">
+<style>
+  html, body { margin: 0; background: #fff; }
+  #pv-carregando { position: fixed; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center;
+    gap: 18px; font-family: -apple-system, "Segoe UI", Roboto, sans-serif; color: #262626; background: #fff; z-index: 10; padding: 24px;
+    text-align: center; }
+  #pv-carregando img { width: min(320px, 70vw); height: auto; }
+  #pv-carregando .barra { width: min(320px, 70vw); height: 6px; border-radius: 3px; background: #F1ECE6; overflow: hidden; }
+  #pv-carregando .barra div { height: 100%; width: 40%; background: #B11E25; border-radius: 3px; animation: pv 1.2s ease-in-out infinite; }
+  #pv-carregando small { color: #6b6b6b; max-width: 420px; line-height: 1.4; }
+  @keyframes pv { 0% { margin-left: -40%; } 100% { margin-left: 100%; } }
+</style>
+</head>
+<body>
+<div id="pv-carregando">
+  <img src="app/assets/logo_vicosa.jpg" alt="Prefeitura de Viçosa">
+  <b>Painel Contábil e Fiscal</b>
+  <div class="barra"><div></div></div>
+  <small id="pv-msg">Preparando o painel neste aparelho… No primeiro acesso o carregamento leva cerca de 1 minuto;
+  nos seguintes é mais rápido e funciona até sem internet.</small>
+</div>
+<div id="root"></div>
+<script type="module">
+import { mount } from "https://cdn.jsdelivr.net/npm/@stlite/browser@1.9.2/build/stlite.js";
+
+const arquivos = {
+ "app.py": "app/app.py",
+ "painel/__init__.py": "app/painel/init__.py",
+ "painel/atualizar.py": "app/painel/atualizar.py",
+ "painel/config.py": "app/painel/config.py",
+ "painel/consistencia.py": "app/painel/consistencia.py",
+ "painel/criticas.py": "app/painel/criticas.py",
+ "painel/dados.py": "app/painel/dados.py",
+ "painel/estado.py": "app/painel/estado.py",
+ "painel/fontes/__init__.py": "app/painel/fontes/init__.py",
+ "painel/fontes/tce_sicom.py": "app/painel/fontes/tce_sicom.py",
+ "painel/formatos.py": "app/painel/formatos.py",
+ "painel/indicadores.py": "app/painel/indicadores.py",
+ "painel/ui/__init__.py": "app/painel/ui/init__.py",
+ "painel/ui/comum.py": "app/painel/ui/comum.py",
+ "painel/ui/navegacao.py": "app/painel/ui/navegacao.py",
+ "painel/ui/paginas/__init__.py": "app/painel/ui/paginas/init__.py",
+ "painel/ui/paginas/atualizacao.py": "app/painel/ui/paginas/atualizacao.py",
+ "painel/ui/paginas/comparativo.py": "app/painel/ui/paginas/comparativo.py",
+ "painel/ui/paginas/consistencia.py": "app/painel/ui/paginas/consistencia.py",
+ "painel/ui/paginas/contratos.py": "app/painel/ui/paginas/contratos.py",
+ "painel/ui/paginas/criticas.py": "app/painel/ui/paginas/criticas.py",
+ "painel/ui/paginas/despesas.py": "app/painel/ui/paginas/despesas.py",
+ "painel/ui/paginas/educacao.py": "app/painel/ui/paginas/educacao.py",
+ "painel/ui/paginas/empenhos.py": "app/painel/ui/paginas/empenhos.py",
+ "painel/ui/paginas/licitacoes.py": "app/painel/ui/paginas/licitacoes.py",
+ "painel/ui/paginas/orgaos.py": "app/painel/ui/paginas/orgaos.py",
+ "painel/ui/paginas/pessoal.py": "app/painel/ui/paginas/pessoal.py",
+ "painel/ui/paginas/receitas.py": "app/painel/ui/paginas/receitas.py",
+ "painel/ui/paginas/saude.py": "app/painel/ui/paginas/saude.py",
+ "painel/ui/paginas/veiculos.py": "app/painel/ui/paginas/veiculos.py",
+ "painel/ui/paginas/visao_geral.py": "app/painel/ui/paginas/visao_geral.py",
+ "assets/logo_vicosa.jpg": "app/assets/logo_vicosa.jpg",
+ ".streamlit/config.toml": "app/streamlit/config.toml",
+ "ferramentas/favorito_sicom_vicosa.js": "app/ferramentas/favorito_sicom_vicosa.js",
+ "parametros_padrao.json": "app/parametros_padrao.json",
+ "pacote_sicom/SICOM.2024.3171303.contrato.zip": "app/pacote_sicom/SICOM.2024.3171303.contrato.zip",
+ "pacote_sicom/SICOM.2024.3171303.desp_pessoal.zip": "app/pacote_sicom/SICOM.2024.3171303.desp_pessoal.zip",
+ "pacote_sicom/SICOM.2024.3171303.despesa.zip": "app/pacote_sicom/SICOM.2024.3171303.despesa.zip",
+ "pacote_sicom/SICOM.2024.3171303.educacao.zip": "app/pacote_sicom/SICOM.2024.3171303.educacao.zip",
+ "pacote_sicom/SICOM.2024.3171303.empenho.zip": "app/pacote_sicom/SICOM.2024.3171303.empenho.zip",
+ "pacote_sicom/SICOM.2024.3171303.frota.zip": "app/pacote_sicom/SICOM.2024.3171303.frota.zip",
+ "pacote_sicom/SICOM.2024.3171303.licitacao.zip": "app/pacote_sicom/SICOM.2024.3171303.licitacao.zip",
+ "pacote_sicom/SICOM.2024.3171303.orgao.zip": "app/pacote_sicom/SICOM.2024.3171303.orgao.zip",
+ "pacote_sicom/SICOM.2024.3171303.receita.zip": "app/pacote_sicom/SICOM.2024.3171303.receita.zip",
+ "pacote_sicom/SICOM.2024.3171303.saude.zip": "app/pacote_sicom/SICOM.2024.3171303.saude.zip",
+ "pacote_sicom/SICOM.2025.3171303.contrato.zip": "app/pacote_sicom/SICOM.2025.3171303.contrato.zip",
+ "pacote_sicom/SICOM.2025.3171303.desp_pessoal.zip": "app/pacote_sicom/SICOM.2025.3171303.desp_pessoal.zip",
+ "pacote_sicom/SICOM.2025.3171303.despesa.zip": "app/pacote_sicom/SICOM.2025.3171303.despesa.zip",
+ "pacote_sicom/SICOM.2025.3171303.educacao.zip": "app/pacote_sicom/SICOM.2025.3171303.educacao.zip",
+ "pacote_sicom/SICOM.2025.3171303.empenho.zip": "app/pacote_sicom/SICOM.2025.3171303.empenho.zip",
+ "pacote_sicom/SICOM.2025.3171303.frota.zip": "app/pacote_sicom/SICOM.2025.3171303.frota.zip",
+ "pacote_sicom/SICOM.2025.3171303.licitacao.zip": "app/pacote_sicom/SICOM.2025.3171303.licitacao.zip",
+ "pacote_sicom/SICOM.2025.3171303.orgao.zip": "app/pacote_sicom/SICOM.2025.3171303.orgao.zip",
+ "pacote_sicom/SICOM.2025.3171303.receita.zip": "app/pacote_sicom/SICOM.2025.3171303.receita.zip",
+ "pacote_sicom/SICOM.2025.3171303.saude.zip": "app/pacote_sicom/SICOM.2025.3171303.saude.zip",
+ "pacote_sicom/SICOM.2026.3171303.contrato.zip": "app/pacote_sicom/SICOM.2026.3171303.contrato.zip",
+ "pacote_sicom/SICOM.2026.3171303.desp_pessoal.zip": "app/pacote_sicom/SICOM.2026.3171303.desp_pessoal.zip",
+ "pacote_sicom/SICOM.2026.3171303.despesa.zip": "app/pacote_sicom/SICOM.2026.3171303.despesa.zip",
+ "pacote_sicom/SICOM.2026.3171303.educacao.zip": "app/pacote_sicom/SICOM.2026.3171303.educacao.zip",
+ "pacote_sicom/SICOM.2026.3171303.empenho.zip": "app/pacote_sicom/SICOM.2026.3171303.empenho.zip",
+ "pacote_sicom/SICOM.2026.3171303.frota.zip": "app/pacote_sicom/SICOM.2026.3171303.frota.zip",
+ "pacote_sicom/SICOM.2026.3171303.licitacao.zip": "app/pacote_sicom/SICOM.2026.3171303.licitacao.zip",
+ "pacote_sicom/SICOM.2026.3171303.orgao.zip": "app/pacote_sicom/SICOM.2026.3171303.orgao.zip",
+ "pacote_sicom/SICOM.2026.3171303.receita.zip": "app/pacote_sicom/SICOM.2026.3171303.receita.zip",
+ "pacote_sicom/SICOM.2026.3171303.saude.zip": "app/pacote_sicom/SICOM.2026.3171303.saude.zip",
+ "pacote_sicom/manifesto.json": "app/pacote_sicom/manifesto.json"
+};
+const files = {};
+// URLs absolutas: o Python roda num Web Worker, que não resolve endereços relativos à página.
+// "?v=" muda a cada geração, para o navegador nunca usar arquivos de uma versão anterior.
+for (const [caminho, url] of Object.entries(arquivos)) files[caminho] = { url: new URL(url + "?v=20261028-2115-e5d556ae", location.href).href };
+
+mount({
+  requirements: ["plotly", "openpyxl"],
+  entrypoint: "app.py",
+  files,
+  idbfsMountpoints: ["/mnt"],  // armazenamento permanente do navegador (o painel usa /mnt/painel)
+  streamlitConfig: { "client.toolbarMode": "minimal", "browser.gatherUsageStats": false },
+}, document.getElementById("root"));
+
+// Esconde a tela de abertura quando o painel desenhar a primeira página. Se a carga inicial falhar
+// (ex.: oscilação de rede), recarrega uma vez sozinho antes de mostrar o erro.
+const fim = setInterval(() => {
+  const falhou = document.querySelector(".Toastify__toast--error");
+  if (falhou && !sessionStorage.getItem("pv-recarregou")) {
+    sessionStorage.setItem("pv-recarregou", "1");
+    location.reload();
+    return;
+  }
+  if (falhou || document.querySelector('.pv-cabecalho, [data-testid="stException"]')) {
+    if (!falhou) sessionStorage.removeItem("pv-recarregou");
+    document.getElementById("pv-carregando").remove();
+    clearInterval(fim);
+  }
+}, 300);
+
+if ("serviceWorker" in navigator) {
+  navigator.serviceWorker.register("sw.js").catch((erro) => console.warn("Modo offline indisponível:", erro));
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,14 @@
+PAINEL CONTÁBIL E FISCAL – VIÇOSA/MG – VERSÃO WEB (gerada em 28/10/2026 21:15)
+
+O painel roda inteiro dentro do navegador do aparelho; nenhum servidor externo processa os dados.
+
+Computador (Mac):      duplo clique em abrir_no_computador.command
+Computador (Windows):  duplo clique em abrir_no_computador.bat (requer Python instalado)
+iPad / iPhone / Android / qualquer aparelho:
+  1. Publique esta pasta em um endereço https (por exemplo GitHub Pages ou Netlify) – veja o README do projeto.
+  2. Abra o endereço no navegador do aparelho (Safari no iPhone/iPad, Chrome no Android).
+  3. Compartilhar → "Adicionar à Tela de Início". O painel vira um ícone e passa a abrir até sem internet.
+
+Dados novos do TCE-MG: aba "Atualização de dados" → enviar os ZIPs baixados pelo favorito "SICOM Viçosa".
+Cada aparelho guarda os seus dados. Para levar os dados novos a todos os aparelhos de uma vez, importe-os no
+painel do computador, gere a versão web de novo e publique-a outra vez.

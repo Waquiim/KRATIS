@@ -42,6 +42,7 @@ pagina = st.navigation({
     "Análises": [paginas[k] for k in ("comparativo", "criticas", "consistencia")],
     "Sistema": [paginas["atualizacao"]],
 })
+comum.traduzir_menu(len(paginas), paginas["atualizacao"].url_path)
 comum.filtros(mostrar_orgaos=pagina.url_path not in {"orgao", "atualizacao", "criticas", "consistencia", "pessoal"})
 comum.atualizacao_automatica()
 pagina.run()

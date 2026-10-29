@@ -67,6 +67,23 @@ def estilos() -> None:
     st.markdown(CSS, unsafe_allow_html=True)
 
 
+def traduzir_menu(total_abas: int, ultima_aba: str) -> None:
+    """Traduz o botão "View N more / View less" do menu lateral (o Streamlit só tem o texto em inglês).
+
+    Recolhido, o menu mostra só as 10 primeiras abas; a presença da última indica que ele está aberto.
+    """
+    ocultas = total_abas - 10
+    if ocultas <= 0:
+        return
+    botao = '[data-testid="stSidebarNavViewButton"]'
+    aberto = f'[data-testid="stSidebarNav"]:has(a[href$="/{ultima_aba}"])'
+    st.markdown(f"""<style>
+{botao} {{ font-size: 0 !important; }}
+{botao}::after {{ content: "Ver mais {ocultas} abas"; font-size: 1rem; }}
+{aberto} {botao}::after {{ content: "Ver menos"; }}
+</style>""", unsafe_allow_html=True)
+
+
 @st.cache_data(show_spinner=False)
 def _logo_base64() -> str:
     return base64.b64encode(LOGO.read_bytes()).decode()

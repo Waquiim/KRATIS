@@ -1,0 +1,22 @@
+{
+  "limite_suplementacao_loa_pct": 30.0,
+  "lei_loa_numero": "",
+  "dispensa_limites": {
+    "2024": {
+      "obras": 119812.02,
+      "outros": 59906.02,
+      "norma": "Decreto nº 11.871/2023"
+    },
+    "2025": {
+      "obras": 125451.15,
+      "outros": 62725.59,
+      "norma": "Decreto nº 12.343/2024"
+    },
+    "2026": {
+      "obras": 130984.2,
+      "outros": 65492.11,
+      "norma": "Decreto nº 12.807/2025"
+    }
+  },
+  "verificar_pasta_downloads": true
+}

@@ -1,0 +1,154 @@
+{
+  "arquivos": {
+    "2024/orgao": {
+      "seqArquivo": 282787,
+      "dataAtualizacao": "2025-06-16T04:25:00",
+      "baixado_em": "2026-10-28T20:12:47.816Z"
+    },
+    "2024/contrato": {
+      "seqArquivo": 282788,
+      "dataAtualizacao": "2025-06-16T04:25:00",
+      "baixado_em": "2026-10-28T20:12:47.816Z"
+    },
+    "2024/despesa": {
+      "seqArquivo": 282789,
+      "dataAtualizacao": "2025-06-16T04:25:00",
+      "baixado_em": "2026-10-28T20:12:47.816Z"
+    },
+    "2024/desp_pessoal": {
+      "seqArquivo": 282790,
+      "dataAtualizacao": "2025-06-16T04:25:00",
+      "baixado_em": "2026-10-28T20:12:47.816Z"
+    },
+    "2024/educacao": {
+      "seqArquivo": 282791,
+      "dataAtualizacao": "2025-06-16T04:25:00",
+      "baixado_em": "2026-10-28T20:12:47.816Z"
+    },
+    "2024/empenho": {
+      "seqArquivo": 282792,
+      "dataAtualizacao": "2025-06-16T04:25:00",
+      "baixado_em": "2026-10-28T20:12:47.816Z"
+    },
+    "2024/frota": {
+      "seqArquivo": 282793,
+      "dataAtualizacao": "2025-06-16T04:25:00",
+      "baixado_em": "2026-10-28T20:12:47.816Z"
+    },
+    "2024/licitacao": {
+      "seqArquivo": 282794,
+      "dataAtualizacao": "2025-06-16T04:25:00",
+      "baixado_em": "2026-10-28T20:12:47.816Z"
+    },
+    "2024/receita": {
+      "seqArquivo": 282795,
+      "dataAtualizacao": "2025-06-16T04:25:00",
+      "baixado_em": "2026-10-28T20:12:47.816Z"
+    },
+    "2024/saude": {
+      "seqArquivo": 282796,
+      "dataAtualizacao": "2025-06-16T04:25:00",
+      "baixado_em": "2026-10-28T20:12:47.816Z"
+    },
+    "2025/orgao": {
+      "seqArquivo": 369500,
+      "dataAtualizacao": "2026-08-07T15:15:00",
+      "baixado_em": "2026-10-28T20:12:47.816Z"
+    },
+    "2025/contrato": {
+      "seqArquivo": 369501,
+      "dataAtualizacao": "2026-08-07T15:15:00",
+      "baixado_em": "2026-10-28T20:12:47.816Z"
+    },
+    "2025/despesa": {
+      "seqArquivo": 369502,
+      "dataAtualizacao": "2026-08-07T15:15:00",
+      "baixado_em": "2026-10-28T20:12:47.816Z"
+    },
+    "2025/desp_pessoal": {
+      "seqArquivo": 369503,
+      "dataAtualizacao": "2026-08-07T15:15:00",
+      "baixado_em": "2026-10-28T20:12:47.816Z"
+    },
+    "2025/educacao": {
+      "seqArquivo": 369504,
+      "dataAtualizacao": "2026-08-07T15:15:00",
+      "baixado_em": "2026-10-28T20:12:47.816Z"
+    },
+    "2025/empenho": {
+      "seqArquivo": 369505,
+      "dataAtualizacao": "2026-08-07T15:15:00",
+      "baixado_em": "2026-10-28T20:12:47.816Z"
+    },
+    "2025/frota": {
+      "seqArquivo": 369506,
+      "dataAtualizacao": "2026-08-07T15:15:00",
+      "baixado_em": "2026-10-28T20:12:47.816Z"
+    },
+    "2025/licitacao": {
+      "seqArquivo": 369507,
+      "dataAtualizacao": "2026-08-07T15:15:00",
+      "baixado_em": "2026-10-28T20:12:47.816Z"
+    },
+    "2025/receita": {
+      "seqArquivo": 369508,
+      "dataAtualizacao": "2026-08-07T15:15:00",
+      "baixado_em": "2026-10-28T20:12:47.816Z"
+    },
+    "2025/saude": {
+      "seqArquivo": 369509,
+      "dataAtualizacao": "2026-08-07T15:15:00",
+      "baixado_em": "2026-10-28T20:12:47.816Z"
+    },
+    "2026/orgao": {
+      "seqArquivo": 367610,
+      "dataAtualizacao": "2026-08-07T15:15:00",
+      "baixado_em": "2026-10-28T20:12:47.816Z"
+    },
+    "2026/contrato": {
+      "seqArquivo": 367611,
+      "dataAtualizacao": "2026-08-07T15:15:00",
+      "baixado_em": "2026-10-28T20:12:47.816Z"
+    },
+    "2026/despesa": {
+      "seqArquivo": 367612,
+      "dataAtualizacao": "2026-08-07T15:15:00",
+      "baixado_em": "2026-10-28T20:12:47.816Z"
+    },
+    "2026/desp_pessoal": {
+      "seqArquivo": 367613,
+      "dataAtualizacao": "2026-08-07T15:15:00",
+      "baixado_em": "2026-10-28T20:12:47.816Z"
+    },
+    "2026/educacao": {
+      "seqArquivo": 367614,
+      "dataAtualizacao": "2026-08-07T15:15:00",
+      "baixado_em": "2026-10-28T20:12:47.816Z"
+    },
+    "2026/empenho": {
+      "seqArquivo": 367615,
+      "dataAtualizacao": "2026-08-07T15:15:00",
+      "baixado_em": "2026-10-28T20:12:47.816Z"
+    },
+    "2026/frota": {
+      "seqArquivo": 367616,
+      "dataAtualizacao": "2026-08-07T15:15:00",
+      "baixado_em": "2026-10-28T20:12:47.816Z"
+    },
+    "2026/licitacao": {
+      "seqArquivo": 367617,
+      "dataAtualizacao": "2026-08-07T15:15:00",
+      "baixado_em": "2026-10-28T20:12:47.816Z"
+    },
+    "2026/receita": {
+      "seqArquivo": 367618,
+      "dataAtualizacao": "2026-08-07T15:15:00",
+      "baixado_em": "2026-10-28T20:12:47.816Z"
+    },
+    "2026/saude": {
+      "seqArquivo": 367619,
+      "dataAtualizacao": "2026-08-07T15:15:00",
+      "baixado_em": "2026-10-28T20:12:47.816Z"
+    }
+  }
+}

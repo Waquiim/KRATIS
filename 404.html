@@ -69,7 +69,6 @@ const arquivos = {
  "painel/ui/paginas/veiculos.py": "painel.ui.paginas.veiculos.py",
  "painel/ui/paginas/visao_geral.py": "painel.ui.paginas.visao_geral.py",
  "assets/logo_vicosa.jpg": "assets.logo_vicosa.jpg",
- ".streamlit/config.toml": "streamlit.config.toml",
  "ferramentas/favorito_sicom_vicosa.js": "ferramentas.favorito_sicom_vicosa.js",
  "parametros_padrao.json": "parametros_padrao.json",
  "pacote_sicom/SICOM.2024.3171303.contrato.zip": "pacote_sicom.SICOM.2024.3171303.contrato.zip",
@@ -107,7 +106,9 @@ const arquivos = {
 const files = {};
 // URLs absolutas: o Python roda num Web Worker, que não resolve endereços relativos à página.
 // "?v=" muda a cada geração, para o navegador nunca usar arquivos de uma versão anterior.
-for (const [caminho, url] of Object.entries(arquivos)) files[caminho] = { url: new URL(url + "?v=20261028-2138-741942ff", location.href).href };
+for (const [caminho, url] of Object.entries(arquivos)) files[caminho] = { url: new URL(url + "?v=20261028-2145-f3f8851b", location.href).href };
+// O tema vai dentro desta página, e não como arquivo à parte, para a publicação depender de um arquivo a menos.
+files[".streamlit/config.toml"] = { data: "# Identidade visual da Prefeitura de Viçosa (cores extraídas da logo oficial)\n[theme]\nbase = \"light\"\nprimaryColor = \"#B11E25\"\nbackgroundColor = \"#FFFFFF\"\nsecondaryBackgroundColor = \"#F6F3EF\"\ntextColor = \"#262626\"\nlinkColor = \"#1F5FAE\"\nborderColor = \"#E4DED6\"\nfont = \"sans serif\"\nbaseRadius = \"0.5rem\"\nredColor = \"#B11E25\"\nblueColor = \"#1F5FAE\"\nyellowColor = \"#A67C00\"\nchartCategoricalColors = [\"#B11E25\", \"#1F5FAE\", \"#A67C00\", \"#1baf7a\", \"#6250d6\", \"#e87ba4\", \"#008300\", \"#eb6834\"]\n\n[theme.sidebar]\nbackgroundColor = \"#FBF8F4\"\nsecondaryBackgroundColor = \"#F1ECE6\"\n\n[server]\nheadless = true\nrunOnSave = false\n# Só aceita conexões deste computador. Para compartilhar na rede interna, use: --server.address 0.0.0.0\naddress = \"localhost\"\nfileWatcherType = \"none\"\n\n[browser]\ngatherUsageStats = false\n\n[client]\ntoolbarMode = \"minimal\"\n" };
 
 mount({
   requirements: ["plotly", "openpyxl"],

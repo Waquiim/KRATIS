@@ -31,26 +31,28 @@ def pagina() -> None:
     ano, mes = comum.ano_selecionado(), comum.mes_selecionado()
     comum.cabecalho("Visão geral", f"Execução orçamentária e indicadores fiscais até {mes_ano(ano, mes)} – {comum.legenda_orgaos()}")
     orgaos = comum.orgaos_selecionados() or None
-    rec = dados.resumo_receita(ano, mes, orgaos)
-    desp = dados.resumo_despesa(ano, mes, orgaos)
+    # Execução total do orçamento: os indicadores desta linha incluem as intraorçamentárias.
+    rec = dados.resumo_receita(ano, mes, orgaos, incluir_intra=True)
+    desp = dados.resumo_despesa(ano, mes, orgaos, incluir_intra=True)
     if not rec or not desp:
         comum.aviso_sem_dados()
         return
 
     c = comum.colunas_kpi(5, "visao_geral-1")
     comum.kpi(c[0], "Receita arrecadada", brl_compacto(rec["realizada"]),
-              f"Receita realizada líquida das deduções, sem intraorçamentárias. Previsão atualizada: {brl(rec['previsao_atualizada'])}.",
+              f"Receita realizada líquida das deduções, incluindo intraorçamentárias. Previsão atualizada: {brl(rec['previsao_atualizada'])}.",
               delta=f"{pct(rec['realizada'] / rec['previsao_atualizada'] * 100 if rec['previsao_atualizada'] else None, 1)} da previsão",
               cor_delta="off")
     comum.kpi(c[1], "Despesa empenhada", brl_compacto(desp["empenhado"]),
-              f"Dotação atualizada: {brl(desp['dotacao_atualizada'])}.",
+              f"Inclui intraorçamentárias. Dotação atualizada: {brl(desp['dotacao_atualizada'])}.",
               delta=f"{pct(desp['empenhado'] / desp['dotacao_atualizada'] * 100 if desp['dotacao_atualizada'] else None, 1)} da dotação",
               cor_delta="off")
-    comum.kpi(c[2], "Despesa liquidada", brl_compacto(desp["liquidado"]))
-    comum.kpi(c[3], "Despesa paga", brl_compacto(desp["pago"]))
+    comum.kpi(c[2], "Despesa liquidada", brl_compacto(desp["liquidado"]), "Inclui intraorçamentárias.")
+    comum.kpi(c[3], "Despesa paga", brl_compacto(desp["pago"]), "Inclui intraorçamentárias.")
     saldo = rec["realizada"] - desp["liquidado"]
     comum.kpi(c[4], "Resultado (rec. − liquid.)", brl_compacto(saldo),
-              "Resultado intermediário: a despesa empenhada inclui empenhos globais e estimativos do ano inteiro.",
+              "Receita arrecadada − despesa liquidada, ambas com intraorçamentárias. Resultado intermediário: a despesa "
+              "empenhada inclui empenhos globais e estimativos do ano inteiro.",
               delta="superávit" if saldo >= 0 else "déficit", cor_delta="normal" if saldo >= 0 else "inverse")
 
     comum.secao("Indicadores fiscais", "Percentuais do exercício (metodologia oficial). Detalhes e memória de cálculo na aba Críticas.")

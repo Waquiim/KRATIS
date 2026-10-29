@@ -103,13 +103,23 @@ const arquivos = {
  "pacote_sicom/SICOM.2026.3171303.saude.zip": "pacote_sicom.SICOM.2026.3171303.saude.zip",
  "pacote_sicom/manifesto.json": "pacote_sicom.manifesto.json"
 };
+// Endereço da pasta do painel (ex.: /KRATIS/ no GitHub Pages), mesmo quando a página é aberta pelo endereço de
+// uma aba (/KRATIS/atualizacao): tira do fim do caminho os nomes das abas.
+const ABAS = ["visao-geral", "receitas", "despesas", "empenho", "pessoal", "saude", "educacao", "licitacao", "contratos", "veiculos", "orgao", "comparativo", "criticas", "consistencia", "atualizacao"];
+const partes = location.pathname.split("/");
+while (partes.length > 1 && (partes[partes.length - 1] === "" || ABAS.includes(partes[partes.length - 1]))) partes.pop();
+const base = partes.join("/") + "/";
 const files = {};
 // URLs absolutas: o Python roda num Web Worker, que não resolve endereços relativos à página.
 // "?v=" muda a cada geração, para o navegador nunca usar arquivos de uma versão anterior.
-for (const [caminho, url] of Object.entries(arquivos)) files[caminho] = { url: new URL(url + "?v=20261028-2216-b2ea7d6f", location.href).href };
+for (const [caminho, url] of Object.entries(arquivos)) files[caminho] = { url: new URL(url + "?v=20261029-0858-86b7bf33", location.origin + base).href };
 // O tema vai dentro desta página, e não como arquivo à parte, para a publicação depender de um arquivo a menos.
 files[".streamlit/config.toml"] = { data: "# Identidade visual da Prefeitura de Viçosa (cores extraídas da logo oficial)\n[theme]\nbase = \"light\"\nprimaryColor = \"#B11E25\"\nbackgroundColor = \"#FFFFFF\"\nsecondaryBackgroundColor = \"#F6F3EF\"\ntextColor = \"#262626\"\nlinkColor = \"#1F5FAE\"\nborderColor = \"#E4DED6\"\nfont = \"sans serif\"\nbaseRadius = \"0.5rem\"\nredColor = \"#B11E25\"\nblueColor = \"#1F5FAE\"\nyellowColor = \"#A67C00\"\nchartCategoricalColors = [\"#B11E25\", \"#1F5FAE\", \"#A67C00\", \"#1baf7a\", \"#6250d6\", \"#e87ba4\", \"#008300\", \"#eb6834\"]\n\n[theme.sidebar]\nbackgroundColor = \"#FBF8F4\"\nsecondaryBackgroundColor = \"#F1ECE6\"\n\n[server]\nheadless = true\nrunOnSave = false\n# Só aceita conexões deste computador. Para compartilhar na rede interna, use: --server.address 0.0.0.0\naddress = \"localhost\"\nfileWatcherType = \"none\"\n\n[browser]\ngatherUsageStats = false\n\n[client]\ntoolbarMode = \"minimal\"\n" };
 
+// O stlite usa o endereço atual como base das abas; aberto em /KRATIS/atualizacao, ele repetiria o nome da aba
+// (/KRATIS/atualizacao/receitas). Monta com o endereço da pasta e devolve o endereço da aba em seguida.
+const enderecoAberto = location.pathname + location.search + location.hash;
+history.replaceState(history.state, "", base + location.search + location.hash);
 mount({
   requirements: ["plotly", "openpyxl"],
   entrypoint: "app.py",
@@ -117,6 +127,7 @@ mount({
   idbfsMountpoints: ["/mnt"],  // armazenamento permanente do navegador (o painel usa /mnt/painel)
   streamlitConfig: { "client.toolbarMode": "minimal", "browser.gatherUsageStats": false },
 }, document.getElementById("root"));
+history.replaceState(history.state, "", enderecoAberto);
 
 // Esconde a tela de abertura quando o painel desenhar a primeira página. Se a carga inicial falhar
 // (ex.: oscilação de rede), recarrega uma vez sozinho antes de mostrar o erro.
@@ -135,7 +146,7 @@ const fim = setInterval(() => {
 }, 300);
 
 if ("serviceWorker" in navigator) {
-  navigator.serviceWorker.register("sw.js").catch((erro) => console.warn("Modo offline indisponível:", erro));
+  navigator.serviceWorker.register(base + "sw.js").catch((erro) => console.warn("Modo offline indisponível:", erro));
 }
 </script>
 </body>
